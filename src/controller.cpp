@@ -3,13 +3,16 @@
 #include "SDL.h"
 #include "snake.h"
 
-void Controller::ChangeDirection(Snake &snake, Snake::Direction input,
-                                 Snake::Direction opposite) const {
-  if (snake.direction != opposite || snake.size == 1) snake.direction = input;
+void Controller::ChangeDirection(Snake &snake, Snake::Direction input, Snake::Direction opposite) 
+{
+  std::lock_guard<std::mutex> lck(controller_mutex);
+  if (snake.GetDirection() != opposite || snake.GetSize() == 1) {
+    snake.SetDirection(input);
+  }
   return;
 }
 
-void Controller::HandleInput(bool &running, Snake &snake) const {
+void Controller::HandleInput(bool &running, Snake &snake) {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
